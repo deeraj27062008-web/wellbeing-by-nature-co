@@ -61,7 +61,6 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
   const [authError, setAuthError] = useState('');
   const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-  const [showSmsPopup, setShowSmsPopup] = useState(false);
   const [activeTab, setActiveTab] = useState('offers'); // 'offers' | 'products' | 'orders' | 'security'
 
   // Ownership Transfer States (Inside Dashboard)
@@ -70,7 +69,6 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
   const [transferOtpSent, setTransferOtpSent] = useState('');
   const [enteredTransferOtp, setEnteredTransferOtp] = useState('');
   const [transferError, setTransferError] = useState('');
-  const [showTransferSms, setShowTransferSms] = useState(false);
 
   // Edit / Add Product Modal State
   const [editingProduct, setEditingProduct] = useState(null);
