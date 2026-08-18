@@ -20,6 +20,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useOffers } from '../context/OfferContext';
 import { brandInfo } from '../data/brandInfo';
 import { categories, healthBenefits } from '../data/categories';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export function Header({
   activePage,
@@ -85,7 +86,7 @@ export function Header({
             onClick={() => handleNavClick('home')}
           >
             <img 
-              src="/images/logo/logo.png" 
+              src={getAssetUrl("/images/logo/logo.png")} 
               alt="WellBeingByNatureCo Logo" 
               className="h-10 sm:h-12 w-auto object-contain"
             />

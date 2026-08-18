@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { brandInfo } from '../data/brandInfo';
+import { getAssetUrl } from '../utils/assetHelper';
 import { 
   ShieldCheck, 
   Mail, 
@@ -78,7 +79,7 @@ export function Footer({ onNavigate }) {
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onNavigate('home')}>
               <img 
-                src="/images/logo/logo.png" 
+                src={getAssetUrl("/images/logo/logo.png")} 
                 alt="WellBeingByNatureCo Logo" 
                 className="h-11 w-auto object-contain rounded-lg shadow-xs" 
               />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
+import { getAssetUrl } from '../utils/assetHelper';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -30,7 +31,7 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
       accentBadge: "Doctor Formulated • FSSAI 20126211000610",
       ctaText: "SHOP NOW",
       secondaryText: "EXPLORE WELLNESS",
-      image: "/images/products/seed-cycling-artwork.jpg"
+      image: getAssetUrl("/images/products/seed-cycling-artwork.jpg")
     },
     {
       id: "slide-morning-shots",
@@ -44,7 +45,7 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
       accentBadge: "Daily Gut Detox • 10 Sachets / 200g",
       ctaText: "SHOP MORNING SHOTS (₹349)",
       secondaryText: "EXPLORE WELLNESS",
-      image: "/images/products/morning-shots-10sachets.jpg"
+      image: getAssetUrl("/images/products/morning-shots-10sachets.jpg")
     },
     {
       id: "slide-rajamudi",
@@ -58,7 +59,7 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
       accentBadge: "Low Glycemic Index • Rich in Fibre",
       ctaText: "SHOP RAJAMUDI RICE (₹499)",
       secondaryText: "EXPLORE WELLNESS",
-      image: "/images/products/rajamudi-red-rice-front.jpg"
+      image: getAssetUrl("/images/products/rajamudi-red-rice-front.jpg")
     },
     {
       id: "slide-millet",
@@ -72,7 +73,7 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
       accentBadge: "Rich in Calcium & Plant Protein",
       ctaText: "SHOP MILLET BLEND (₹449)",
       secondaryText: "EXPLORE WELLNESS",
-      image: "/images/products/millet-mixed-powder.jpg"
+      image: getAssetUrl("/images/products/millet-mixed-powder.jpg")
     }
   ];
 

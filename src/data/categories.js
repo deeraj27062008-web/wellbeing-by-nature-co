@@ -1,10 +1,12 @@
+import { getAssetUrl } from '../utils/assetHelper';
+
 export const categories = [
   {
     id: "seed-cycling",
     name: "Hormone Balance & Women's Health",
     shortName: "Seed Cycling",
     icon: "🌻",
-    image: "/images/products/seed-cycling-artwork.jpg",
+    image: getAssetUrl("/images/products/seed-cycling-artwork.jpg"),
     description: "Phase 1 & Phase 2 raw unroasted whole seed protocols formulated for 28-day hormone balance."
   },
   {
@@ -12,7 +14,7 @@ export const categories = [
     name: "Gut Health & Morning Shots",
     shortName: "Morning Shots",
     icon: "🫚",
-    image: "/images/products/morning-shots-10sachets.jpg",
+    image: getAssetUrl("/images/products/morning-shots-10sachets.jpg"),
     description: "Daily turmeric, amla & ginger gut-friendly drink mix to awaken metabolism and calm morning bloating."
   },
   {
@@ -20,7 +22,7 @@ export const categories = [
     name: "Traditional Grains & Superfoods",
     shortName: "Rajamudi Rice",
     icon: "🌾",
-    image: "/images/products/rajamudi-red-rice-front.jpg",
+    image: getAssetUrl("/images/products/rajamudi-red-rice-front.jpg"),
     description: "100% Traditional unpolished Rajamudi Red Rice rich in fibre, low GI, and heart antioxidants."
   },
   {
@@ -28,7 +30,7 @@ export const categories = [
     name: "Traditional Supergrain Blends",
     shortName: "Millet Powder",
     icon: "🥣",
-    image: "/images/products/millet-mixed-powder.jpg",
+    image: getAssetUrl("/images/products/millet-mixed-powder.jpg"),
     description: "Nourishing blend of Ragi, Jowar, Chickpea & Foxtail Millet for daily plant calcium and clean energy."
   }
 ];

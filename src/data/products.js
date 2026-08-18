@@ -1,4 +1,6 @@
-export const initialProducts = [
+import { getAssetUrl } from '../utils/assetHelper';
+
+const rawProducts = [
   {
     id: "rajamudi-red-rice",
     slug: "rajamudi-red-rice",
@@ -458,5 +460,12 @@ export const initialProducts = [
     description: "Millet Mixed Powder is an artisanal amalgamation of time-honored Indian supergrains. Combining sprouted Ragi, hearty Jowar, wholesome Chickpea, and delicate Foxtail Millet, this nutrient-dense mix delivers rich plant calcium, fiber, and clean protein for people of all ages."
   }
 ];
+
+export const initialProducts = rawProducts.map((p) => ({
+  ...p,
+  image: getAssetUrl(p.image),
+  backImage: p.backImage ? getAssetUrl(p.backImage) : getAssetUrl(p.image),
+  images: (p.images || [p.image]).map((img) => getAssetUrl(img))
+}));
 
 export const products = initialProducts;

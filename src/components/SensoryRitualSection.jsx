@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Sun, Sunset, Moon, Clock, ArrowRight, ShieldCheck, Heart } from 'lucide-react';
 import { products } from '../data/products';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const SensoryRitualSection = ({ onSelectProduct }) => {
   const rituals = [
@@ -13,7 +14,7 @@ export const SensoryRitualSection = ({ onSelectProduct }) => {
       productId: "morning-shots-gut-drink",
       description: "Blend 1 sachet (5g) with 200ml lukewarm water. Whole Amla, pure Turmeric, and warming Ginger soothe the stomach lining, stimulate bile flow, and banish morning sluggishness.",
       sensoryNote: "Tasting notes: Earthy Golden Turmeric with a zesty citrus-ginger warmth.",
-      image: "/images/products/morning-shots-10sachets.jpg"
+      image: getAssetUrl("/images/products/morning-shots-10sachets.jpg")
     },
     {
       time: "01:30 PM",
@@ -24,7 +25,7 @@ export const SensoryRitualSection = ({ onSelectProduct }) => {
       productId: "rajamudi-red-rice",
       description: "Slow-simmer unpolished Rajamudi grains. Rich in anthocyanin pigments and slow-burning complex carbs, it prevents afternoon sugar crashes and provides sustained satiety.",
       sensoryNote: "Sensory notes: Royal nutty aroma, firm hearty grain texture with natural red bran.",
-      image: "/images/products/rajamudi-red-rice-front.jpg"
+      image: getAssetUrl("/images/products/rajamudi-red-rice-front.jpg")
     },
     {
       time: "08:30 PM",
@@ -35,7 +36,7 @@ export const SensoryRitualSection = ({ onSelectProduct }) => {
       productId: "seed-cycling-duo-kit",
       description: "Take your synchronized Phase 1 (Flax + Pumpkin) or Phase 2 (Sesame + Sunflower) raw seed blend to modulate natural hormone rhythms and support peaceful rest.",
       sensoryNote: "Sensory notes: Crisp, fresh unroasted whole seed crunch packed with Zinc, Vitamin E & Omega-3.",
-      image: "/images/products/seed-cycling-artwork.jpg"
+      image: getAssetUrl("/images/products/seed-cycling-artwork.jpg")
     }
   ];
 
