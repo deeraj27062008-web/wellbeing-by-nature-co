@@ -79,7 +79,7 @@ export function Footer({ onNavigate }) {
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => onNavigate('home')}>
               {/* Circular Medallion */}
-              <div className="w-13 h-13 rounded-full bg-white p-1 border border-gold-400/50 ring-2 ring-gold-500/20 shadow-md flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white p-1 border border-gold-400/50 ring-2 ring-gold-500/20 shadow-md flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <img 
                   src={getAssetUrl("/images/logo/logo.png")} 
                   alt="WellBeingByNatureCo Logo" 

@@ -86,7 +86,7 @@ export function Header({
             onClick={() => handleNavClick('home')}
           >
             {/* Circular Medallion */}
-            <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-gradient-to-br from-warm-100 via-white to-warm-200 p-1 border border-gold-500/40 ring-1 ring-brand-900/10 shadow-xs flex items-center justify-center overflow-hidden group-hover:scale-105 group-hover:border-gold-500 transition-all duration-300">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-warm-100 via-white to-warm-200 p-1 border border-gold-500/40 ring-1 ring-brand-900/10 shadow-xs flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 group-hover:border-gold-500 transition-all duration-300">
               <img 
                 src={getAssetUrl("/images/logo/logo.png")} 
                 alt="WellBeingByNatureCo Logo" 
