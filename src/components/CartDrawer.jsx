@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Check
 } from 'lucide-react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const CartDrawer = ({ onSelectProduct }) => {
   const {
@@ -150,7 +151,7 @@ export const CartDrawer = ({ onSelectProduct }) => {
                   className="flex items-start space-x-3.5 p-3.5 bg-[#FAF8F5] rounded-2xl border border-warm-200 shadow-xs"
                 >
                   <img
-                    src={item.image}
+                    src={getAssetUrl(item.image)}
                     alt={item.name}
                     className="w-16 h-16 object-contain rounded-xl bg-white p-1 border border-warm-200 shrink-0"
                   />

@@ -1,8 +1,10 @@
 import React from 'react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
+import { useProducts } from '../context/ProductContext';
 import { products } from '../data/products';
-import { X, Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
+import { X, Heart, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const WishlistDrawer = ({ onSelectProduct }) => {
   const { wishlist, isWishlistOpen, closeWishlist, toggleWishlist } = useWishlist();
@@ -55,7 +57,7 @@ export const WishlistDrawer = ({ onSelectProduct }) => {
                 >
                   <div className="flex items-center space-x-3 min-w-0">
                     <img
-                      src={product.image}
+                      src={getAssetUrl(product.image)}
                       alt={product.name}
                       className="w-14 h-14 object-contain rounded-xl bg-white p-1 border border-warm-200 shrink-0"
                     />

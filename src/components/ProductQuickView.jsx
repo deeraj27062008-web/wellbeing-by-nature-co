@@ -10,11 +10,12 @@ import {
   ShieldCheck, 
   Leaf, 
   Sparkles, 
-  Flame,
-  Award,
-  ChevronRight,
-  Info
+  Flame, 
+  Award, 
+  ChevronRight, 
+  Info 
 } from 'lucide-react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const ProductQuickView = ({ product, onClose }) => {
   if (!product) return null;
@@ -75,7 +76,7 @@ export const ProductQuickView = ({ product, onClose }) => {
                 </span>
               )}
               <img
-                src={images[activeImageIndex] || product.image}
+                src={getAssetUrl(images[activeImageIndex] || product.image)}
                 alt={product.name}
                 className="w-full h-full object-contain mix-blend-multiply"
               />
@@ -92,7 +93,7 @@ export const ProductQuickView = ({ product, onClose }) => {
                       activeImageIndex === idx ? 'border-brand-900 ring-2 ring-brand-900/20' : 'border-warm-200 hover:border-brand-400'
                     }`}
                   >
-                    <img src={img} alt="thumbnail" className="w-full h-full object-contain" />
+                    <img src={getAssetUrl(img)} alt="thumbnail" className="w-full h-full object-contain" />
                   </button>
                 ))}
               </div>

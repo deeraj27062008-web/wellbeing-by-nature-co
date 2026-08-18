@@ -1,5 +1,6 @@
 import React from 'react';
 import { categories } from '../data/categories';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const CategoryRoundels = ({ onSelectCategory, activeCategory }) => {
   return (
@@ -43,7 +44,7 @@ export const CategoryRoundels = ({ onSelectCategory, activeCategory }) => {
                 }`}>
                   <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center p-1.5 shadow-inner">
                     <img
-                      src={cat.image}
+                      src={getAssetUrl(cat.image)}
                       alt={cat.name}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                     />

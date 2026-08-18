@@ -23,6 +23,7 @@ import {
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { brandInfo } from '../data/brandInfo';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export function ProductDetailPage({ product, onOpenChatbot, onSelectProduct, onOpenBatchVerifier }) {
   const { addToCart, openCheckout } = useCart();
@@ -112,7 +113,7 @@ export function ProductDetailPage({ product, onOpenChatbot, onSelectProduct, onO
               </button>
 
               <img
-                src={images[activeImageIndex] || product.image}
+                src={getAssetUrl(images[activeImageIndex] || product.image)}
                 alt={product.name}
                 className="w-full h-full object-contain hover:scale-105 transition-transform duration-300 select-none"
               />
@@ -136,7 +137,7 @@ export function ProductDetailPage({ product, onOpenChatbot, onSelectProduct, onO
                       activeImageIndex === idx ? 'border-brand-950 shadow-md' : 'border-warm-200 hover:border-warm-400'
                     }`}
                   >
-                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-contain" />
+                    <img src={getAssetUrl(img)} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-contain" />
                   </button>
                 ))}
               </div>

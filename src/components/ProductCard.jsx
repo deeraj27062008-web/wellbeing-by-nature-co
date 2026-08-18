@@ -10,6 +10,7 @@ import {
   Sparkles,
   ShieldCheck
 } from 'lucide-react';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export const ProductCard = ({ product, onQuickView }) => {
   const { addToCart } = useCart();
@@ -75,7 +76,7 @@ export const ProductCard = ({ product, onQuickView }) => {
         onClick={() => onQuickView(product)}
       >
         <img
-          src={isHovered && product.backImage ? product.backImage : product.image}
+          src={getAssetUrl(isHovered && product.backImage ? product.backImage : product.image)}
           alt={product.name}
           className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
         />

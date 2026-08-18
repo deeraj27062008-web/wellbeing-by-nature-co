@@ -8,7 +8,20 @@ export function getAssetUrl(path) {
   
   const base = import.meta.env.BASE_URL || '/';
   const cleanBase = base.endsWith('/') ? base : `${base}/`;
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  
+  let cleanPath = path;
+  // Remove existing base path if already present
+  if (cleanPath.startsWith(cleanBase)) {
+    cleanPath = cleanPath.slice(cleanBase.length);
+  } else if (cleanPath.startsWith('/wellbeing-by-nature-co/')) {
+    cleanPath = cleanPath.slice('/wellbeing-by-nature-co/'.length);
+  } else if (cleanPath.startsWith('wellbeing-by-nature-co/')) {
+    cleanPath = cleanPath.slice('wellbeing-by-nature-co/'.length);
+  }
+  
+  if (cleanPath.startsWith('/')) {
+    cleanPath = cleanPath.slice(1);
+  }
   
   return `${cleanBase}${cleanPath}`;
 }

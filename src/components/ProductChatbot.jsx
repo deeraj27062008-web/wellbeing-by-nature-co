@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
+import { getAssetUrl } from '../utils/assetHelper';
 
 export function ProductChatbot({ currentProduct = null, isOpen, onClose }) {
   const { addToCart } = useCart();
@@ -271,7 +272,7 @@ export function ProductChatbot({ currentProduct = null, isOpen, onClose }) {
                   <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between bg-warm-50 p-2 rounded-xl">
                     <div className="flex items-center space-x-2 truncate">
                       <img 
-                        src={msg.productLink.image} 
+                        src={getAssetUrl(msg.productLink.image)} 
                         alt={msg.productLink.name} 
                         className="w-8 h-8 object-contain rounded bg-white border border-warm-200" 
                       />

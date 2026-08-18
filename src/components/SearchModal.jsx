@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { getAssetUrl } from '../utils/assetHelper';
 import { Search, X, Star, ArrowRight, Sparkles, Tag } from 'lucide-react';
 
 export const SearchModal = ({ isOpen, onClose, onSelectProduct }) => {
@@ -108,9 +109,9 @@ export const SearchModal = ({ isOpen, onClose, onSelectProduct }) => {
                   >
                     <div className="flex items-center space-x-3">
                       <img 
-                        src={product.image} 
+                        src={getAssetUrl(product.image)} 
                         alt={product.name} 
-                        className="w-12 h-12 object-cover rounded-lg bg-warm-100 border border-warm-200" 
+                        className="w-12 h-12 object-contain rounded-lg bg-warm-100 border border-warm-200" 
                       />
                       <div>
                         <p className="text-xs font-bold text-gray-900 group-hover:text-brand-800 transition">
@@ -131,7 +132,7 @@ export const SearchModal = ({ isOpen, onClose, onSelectProduct }) => {
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-base font-bold text-gray-800 mb-1">No products found for "{query}"</p>
-              <p className="text-xs text-gray-500">Try searching for "Rajamudi", "Morning", "Seed", or "Collagen".</p>
+              <p className="text-xs text-gray-500">Try searching for "Rajamudi", "Morning", "Seed", or "Millet".</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -149,9 +150,9 @@ export const SearchModal = ({ isOpen, onClose, onSelectProduct }) => {
                 >
                   <div className="flex items-center space-x-3.5">
                     <img 
-                      src={product.image} 
+                      src={getAssetUrl(product.image)} 
                       alt={product.name} 
-                      className="w-14 h-14 object-cover rounded-lg bg-warm-100 border border-warm-200 shrink-0" 
+                      className="w-14 h-14 object-contain rounded-lg bg-warm-100 border border-warm-200 shrink-0" 
                     />
                     <div>
                       <div className="flex items-center space-x-2">
