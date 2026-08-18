@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const OfferContext = createContext(null);
 
 const OFFER_STORAGE_KEY = 'wbn_offers_settings_v1';
-const OWNER_AUTH_KEY = 'wbn_owner_auth_v1';
+const OWNER_AUTH_KEY = 'wbn_owner_auth_v2';
 
 const defaultOffersState = {
   announcements: [
@@ -41,14 +41,19 @@ export function OfferProvider({ children }) {
 
   const [ownerAuth, setOwnerAuth] = useState(() => {
     try {
+      localStorage.removeItem('wbn_owner_auth_v1');
       const saved = localStorage.getItem(OWNER_AUTH_KEY);
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return {
       isAuthenticated: false,
-      ownerPhone: "9876543210",
-      ownerName: "WellBeing Owner",
-      lastLogin: null
+      ownerPhone: "9618861300",
+      previousOwnerPhone: null,
+      ownerName: "WellBeing Founder & Owner",
+      lastLogin: null,
+      transferHistory: [
+        { date: "Initial Brand Setup", from: null, to: "9618861300", verifiedBy: "System Registration" }
+      ]
     };
   });
 
@@ -91,21 +96,38 @@ export function OfferProvider({ children }) {
   };
 
   const loginOwner = (phone) => {
-    setOwnerAuth({
+    setOwnerAuth((prev) => ({
+      ...prev,
       isAuthenticated: true,
-      ownerPhone: phone,
+      ownerPhone: prev.ownerPhone || phone || "9618861300",
       ownerName: "Verified Store Owner",
       lastLogin: new Date().toISOString()
-    });
+    }));
   };
 
   const logoutOwner = () => {
-    setOwnerAuth({
+    setOwnerAuth((prev) => ({
+      ...prev,
       isAuthenticated: false,
-      ownerPhone: ownerAuth.ownerPhone,
-      ownerName: "WellBeing Owner",
       lastLogin: null
-    });
+    }));
+  };
+
+  const changeOwnerPhone = (newPhone, previousOwner) => {
+    setOwnerAuth((prev) => ({
+      ...prev,
+      ownerPhone: newPhone,
+      previousOwnerPhone: previousOwner,
+      transferHistory: [
+        {
+          date: new Date().toLocaleString(),
+          from: previousOwner,
+          to: newPhone,
+          verifiedBy: `OTP Verified by Last Owner (${previousOwner})`
+        },
+        ...(prev.transferHistory || [])
+      ]
+    }));
   };
 
   const resetOffersToDefault = () => {
@@ -124,6 +146,7 @@ export function OfferProvider({ children }) {
         updateFreeShippingThreshold,
         loginOwner,
         logoutOwner,
+        changeOwnerPhone,
         resetOffersToDefault
       }}
     >

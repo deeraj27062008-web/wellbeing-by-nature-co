@@ -80,16 +80,29 @@ export function Header({
             </button>
           </div>
 
-          {/* Official Brand Logo */}
+          {/* Official Brand Logo - Neatly Immersed Circular Luxury Emblem */}
           <div 
-            className="flex items-center shrink-0 cursor-pointer py-1 pr-4" 
+            className="flex items-center space-x-3 shrink-0 cursor-pointer py-1 pr-3 group" 
             onClick={() => handleNavClick('home')}
           >
-            <img 
-              src={getAssetUrl("/images/logo/logo.png")} 
-              alt="WellBeingByNatureCo Logo" 
-              className="h-10 sm:h-12 w-auto object-contain"
-            />
+            {/* Circular Medallion */}
+            <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-gradient-to-br from-warm-100 via-white to-warm-200 p-1 border border-gold-500/40 ring-1 ring-brand-900/10 shadow-xs flex items-center justify-center overflow-hidden group-hover:scale-105 group-hover:border-gold-500 transition-all duration-300">
+              <img 
+                src={getAssetUrl("/images/logo/logo.png")} 
+                alt="WellBeingByNatureCo Logo" 
+                className="w-full h-full object-contain mix-blend-multiply"
+              />
+            </div>
+
+            {/* Brand Typography Lockup */}
+            <div className="flex flex-col">
+              <span className="font-serif font-bold text-sm sm:text-base text-brand-950 tracking-tight leading-tight group-hover:text-brand-800 transition">
+                WellBeing<span className="text-brand-700">ByNature</span>Co
+              </span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-gold-600 font-mono font-bold -mt-0.5">
+                NURTURE • BALANCE • THRIVE
+              </span>
+            </div>
           </div>
 
           {/* Desktop Navigation Links */}

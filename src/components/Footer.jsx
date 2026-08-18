@@ -77,14 +77,17 @@ export function Footer({ onNavigate }) {
           
           {/* Col 1: Brand & Official Registration */}
           <div className="lg:col-span-4 space-y-4">
-            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onNavigate('home')}>
-              <img 
-                src={getAssetUrl("/images/logo/logo.png")} 
-                alt="WellBeingByNatureCo Logo" 
-                className="h-11 w-auto object-contain rounded-lg shadow-xs" 
-              />
+            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => onNavigate('home')}>
+              {/* Circular Medallion */}
+              <div className="w-13 h-13 rounded-full bg-white p-1 border border-gold-400/50 ring-2 ring-gold-500/20 shadow-md flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
+                <img 
+                  src={getAssetUrl("/images/logo/logo.png")} 
+                  alt="WellBeingByNatureCo Logo" 
+                  className="w-full h-full object-contain mix-blend-multiply" 
+                />
+              </div>
               <div className="flex flex-col">
-                <span className="font-serif font-bold text-xl text-white">
+                <span className="font-serif font-bold text-xl text-white group-hover:text-gold-300 transition">
                   WellBeing<span className="text-brand-400">ByNature</span>Co
                 </span>
                 <span className="text-[9px] uppercase tracking-widest text-gold-400 font-mono -mt-0.5">

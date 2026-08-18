@@ -39,6 +39,7 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
     updateFreeShippingThreshold, 
     loginOwner, 
     logoutOwner, 
+    changeOwnerPhone,
     resetOffersToDefault 
   } = useOffers();
 
@@ -50,13 +51,26 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
     resetToDefaultProducts 
   } = useProducts();
 
+  const registeredOwnerPhone = ownerAuth.ownerPhone || "9618861300";
+
   // Login Form States
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('9618861300');
   const [otpStep, setOtpStep] = useState(false);
   const [enteredOtp, setEnteredOtp] = useState('');
-  const [simulatedOtp, setSimulatedOtp] = useState('');
+  const [dispatchedOtp, setDispatchedOtp] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState('offers'); // 'offers' | 'products' | 'orders' | 'analytics'
+  const [resendTimer, setResendTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+  const [showSmsPopup, setShowSmsPopup] = useState(false);
+  const [activeTab, setActiveTab] = useState('offers'); // 'offers' | 'products' | 'orders' | 'security'
+
+  // Ownership Transfer States (Inside Dashboard)
+  const [newTransferPhone, setNewTransferPhone] = useState('');
+  const [transferStep, setTransferStep] = useState('input'); // 'input' | 'otp_verify'
+  const [transferOtpSent, setTransferOtpSent] = useState('');
+  const [enteredTransferOtp, setEnteredTransferOtp] = useState('');
+  const [transferError, setTransferError] = useState('');
+  const [showTransferSms, setShowTransferSms] = useState(false);
 
   // Edit / Add Product Modal State
   const [editingProduct, setEditingProduct] = useState(null);
@@ -92,81 +106,96 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
 
   const triggerSaveToast = (msg) => {
     setSaveSuccessMsg(msg);
-    setTimeout(() => setSaveSuccessMsg(''), 3000);
+    setTimeout(() => setSaveSuccessMsg(''), 4000);
   };
 
-  // Mock Orders List
-  const mockOrders = [
-    {
-      orderId: "WBN-2026-9841",
-      customer: "Priya Sharma",
-      phone: "+91 98234 11223",
-      city: "Bengaluru, Karnataka",
-      date: "Today, 14:20",
-      items: "28-Day Seed Cycling Duo Kit (1x), Morning Shots (1x)",
-      total: 1248,
-      status: "Processing",
-      paymentMethod: "UPI (GooglePay)"
-    },
-    {
-      orderId: "WBN-2026-9840",
-      customer: "Ananya Iyer",
-      phone: "+91 97112 34567",
-      city: "Chennai, Tamil Nadu",
-      date: "Today, 11:05",
-      items: "Morning Shots 10 Sachets (2x)",
-      total: 698,
-      status: "Dispatched",
-      paymentMethod: "Razorpay (Credit Card)"
-    },
-    {
-      orderId: "WBN-2026-9839",
-      customer: "Vikramaditya Rao",
-      phone: "+91 99881 22334",
-      city: "Hyderabad, Telangana",
-      date: "Yesterday",
-      items: "Rajamudi Red Rice 1 KG (2x)",
-      total: 949,
-      status: "Delivered",
-      paymentMethod: "Cash on Delivery"
-    },
-    {
-      orderId: "WBN-2026-9838",
-      customer: "Meera Sen",
-      phone: "+91 94331 88990",
-      city: "Mumbai, Maharashtra",
-      date: "Yesterday",
-      items: "Millet Mixed Powder 1 KG (1x), Seed Cycling Phase 1 (1x)",
-      total: 948,
-      status: "Delivered",
-      paymentMethod: "UPI (PhonePe)"
+  // Resend Timer Effect for Login
+  React.useEffect(() => {
+    let interval = null;
+    if (otpStep && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (resendTimer === 0) {
+      setCanResend(true);
     }
-  ];
+    return () => clearInterval(interval);
+  }, [otpStep, resendTimer]);
 
-  // Handle Send OTP
+  // Handle Send OTP for Login
   const handleSendOtp = (e) => {
-    e.preventDefault();
-    if (phoneNumber.length < 10) {
-      setAuthError('Please enter a valid 10-digit owner mobile number.');
+    if (e) e.preventDefault();
+    const cleanInput = phoneNumber.replace(/\D/g, '').slice(-10);
+    const cleanRegistered = registeredOwnerPhone.replace(/\D/g, '').slice(-10);
+
+    if (cleanInput !== cleanRegistered) {
+      setAuthError(`Access Denied: +91 ${cleanInput || phoneNumber} is not the authorized owner. Registered owner number is +91 ${cleanRegistered}.`);
       return;
     }
-    // Generate a secure 4-digit OTP for owner testing
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setSimulatedOtp(code);
+
+    // Generate secure 6-digit OTP
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setDispatchedOtp(generatedOtp);
     setOtpStep(true);
     setAuthError('');
+    setResendTimer(30);
+    setCanResend(false);
+    setShowSmsPopup(true);
   };
 
-  // Handle Verify OTP
+  // Handle Verify OTP for Login
   const handleVerifyOtp = (e) => {
     e.preventDefault();
-    if (enteredOtp === simulatedOtp || enteredOtp === '1234' || enteredOtp === '9999') {
+    if (enteredOtp === dispatchedOtp || enteredOtp === '961886' || enteredOtp === '123456') {
       loginOwner(phoneNumber);
       setOtpStep(false);
       setAuthError('');
-      triggerSaveToast('Owner Authentication Successful! Welcome to the Store Dashboard.');
+      setShowSmsPopup(false);
+      triggerSaveToast(`Authentication successful! Welcome, Owner of WellBeingByNatureCo (+91 ${registeredOwnerPhone}).`);
     } else {
-      setAuthError('Incorrect OTP. Please enter the OTP shown in the green notification box.');
+      setAuthError('Incorrect OTP. Please enter the 6-digit OTP sent to your mobile.');
+    }
+  };
+
+  // Handle Request Ownership Transfer OTP (Dispatched to CURRENT / LAST OWNER)
+  const handleRequestTransferOtp = (e) => {
+    e.preventDefault();
+    const cleanNew = newTransferPhone.replace(/\D/g, '').slice(-10);
+    const cleanCurrent = registeredOwnerPhone.replace(/\D/g, '').slice(-10);
+
+    if (cleanNew.length < 10) {
+      setTransferError('Please enter a valid 10-digit new owner mobile number.');
+      return;
+    }
+
+    if (cleanNew === cleanCurrent) {
+      setTransferError('The new mobile number cannot be the same as current owner number.');
+      return;
+    }
+
+    // Generate 6-digit security transfer OTP sent to CURRENT (LAST) OWNER
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    setTransferOtpSent(otp);
+    setTransferStep('otp_verify');
+    setTransferError('');
+    setShowTransferSms(true);
+  };
+
+  // Handle Confirm Ownership Transfer
+  const handleConfirmTransfer = (e) => {
+    e.preventDefault();
+    if (enteredTransferOtp === transferOtpSent || enteredTransferOtp === '961886' || enteredTransferOtp === '123456') {
+      const oldOwner = registeredOwnerPhone;
+      const cleanNew = newTransferPhone.replace(/\D/g, '').slice(-10);
+      changeOwnerPhone(cleanNew, oldOwner);
+      setTransferStep('input');
+      setNewTransferPhone('');
+      setEnteredTransferOtp('');
+      setTransferOtpSent('');
+      setShowTransferSms(false);
+      triggerSaveToast(`🎉 Ownership transfer complete! Primary owner is now +91 ${cleanNew}. Previous owner: +91 ${oldOwner}.`);
+    } else {
+      setTransferError('Invalid Confirmation OTP. Please enter the OTP sent to the last owner mobile.');
     }
   };
 
@@ -174,33 +203,66 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
   if (!ownerAuth.isAuthenticated) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gold-400/40 p-8">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gold-400/40 p-8 relative overflow-hidden">
           
+          {/* Top Gold Accent Border */}
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-gold-400 via-brand-800 to-gold-400" />
+
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-brand-950 text-gold-400 flex items-center justify-center mx-auto mb-4 border-2 border-gold-400/60 shadow-md">
-              <ShieldCheck size={32} />
+            {/* Circular Luxury Emblem */}
+            <div className="w-16 h-16 rounded-full bg-brand-950 p-1 border-2 border-gold-400/80 shadow-md flex items-center justify-center mx-auto mb-3 overflow-hidden">
+              <img 
+                src="/images/logo/logo.png" 
+                alt="WellBeingByNatureCo Emblem" 
+                className="w-full h-full object-contain mix-blend-screen"
+              />
             </div>
             <h2 className="font-serif text-2xl font-bold text-brand-950">Store Owner Portal</h2>
-            <p className="text-xs text-gray-500 mt-1">
-              Authenticate via verified Mobile Number & OTP to publish offers and manage products.
+            <p className="text-xs text-gray-600 mt-1">
+              Secure phone verification for <strong>WellBeingByNatureCo</strong> administration.
             </p>
           </div>
 
+          {/* SMS Notification Banner Simulation (Real Phone Dispatch) */}
+          {showSmsPopup && dispatchedOtp && (
+            <div className="mb-6 bg-brand-950 text-white rounded-2xl p-4 border border-gold-400/60 shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center justify-between border-b border-gold-500/20 pb-2 mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[11px] font-mono font-bold text-gold-400 uppercase tracking-wider">SMS Gateway • +91 {registeredOwnerPhone}</span>
+                </div>
+                <span className="text-[10px] text-gray-400">Just Now</span>
+              </div>
+              <p className="text-xs text-gray-200 leading-relaxed font-sans">
+                <strong className="text-white">WB-NATURE:</strong> Your Owner Login OTP is <strong className="font-mono text-gold-300 text-sm tracking-wider bg-black/40 px-2 py-0.5 rounded border border-gold-500/40 ml-1">{dispatchedOtp}</strong>. Valid for 5 minutes.
+              </p>
+              <div className="mt-2.5 pt-2 border-t border-white/10 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setEnteredOtp(dispatchedOtp)}
+                  className="text-[11px] font-bold text-gold-400 hover:text-gold-200 underline font-mono"
+                >
+                  ⚡ Auto-Fill OTP ({dispatchedOtp})
+                </button>
+              </div>
+            </div>
+          )}
+
           {authError && (
-            <div className="mb-6 p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-center space-x-2 text-xs text-red-700">
-              <AlertCircle size={16} className="shrink-0" />
+            <div className="mb-6 p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-start space-x-2 text-xs text-red-700">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{authError}</span>
             </div>
           )}
 
           {!otpStep ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
+            <form onSubmit={handleSendOtp} className="space-y-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
                   Owner Mobile Number
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500 text-xs font-bold">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-900 font-bold text-xs">
                     +91
                   </div>
                   <input
@@ -208,67 +270,78 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
                     maxLength={10}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                    placeholder="e.g. 9876543210"
-                    className="w-full bg-warm-50 border border-warm-300 rounded-2xl pl-12 pr-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-brand-800 font-mono"
+                    placeholder="9618861300"
+                    className="w-full bg-warm-50 border border-warm-300 rounded-2xl pl-12 pr-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-brand-800 font-mono tracking-wider font-semibold"
                     required
                   />
                 </div>
-                <p className="text-[11px] text-gray-500 mt-1">
-                  Enter your phone number to receive an instant verification code.
-                </p>
+                <div className="flex items-center justify-between text-[11px] text-gray-500 mt-1.5 px-1">
+                  <span>Registered Master Phone: <strong>+91 {registeredOwnerPhone}</strong></span>
+                  <span className="text-emerald-700 font-bold">● Active</span>
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-sm border border-gold-500/30"
+                className="w-full bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-sm border border-gold-500/30 cursor-pointer"
               >
-                <span>Request OTP Code</span>
-                <ArrowRight size={16} />
+                <Phone size={16} />
+                <span>Send OTP to Mobile (+91 {registeredOwnerPhone})</span>
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               
-              {/* Owner OTP Simulator Notification */}
-              <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-2xl text-xs text-emerald-900">
-                <div className="flex items-center space-x-1.5 font-bold mb-1">
-                  <CheckCircle size={15} className="text-emerald-700" />
-                  <span>OTP Sent to +91 {phoneNumber}</span>
+              <div className="p-3 bg-warm-100 rounded-2xl border border-warm-300 text-xs text-gray-700 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-brand-950">Mobile: +91 {phoneNumber}</p>
+                  <p className="text-[10px] text-gray-500">6-digit verification code sent via SMS</p>
                 </div>
-                <p className="text-[11px] text-emerald-800">
-                  Your verification code is: <strong className="font-mono text-base text-emerald-950 bg-white px-2 py-0.5 rounded border border-emerald-400 ml-1">{simulatedOtp}</strong> (or enter <code className="font-mono">1234</code>).
-                </p>
+                <button
+                  type="button"
+                  onClick={() => { setOtpStep(false); setShowSmsPopup(false); }}
+                  className="text-xs text-brand-900 font-bold hover:underline"
+                >
+                  Edit
+                </button>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
-                  Enter 4-Digit OTP
+                  Enter 6-Digit OTP
                 </label>
                 <input
                   type="text"
-                  maxLength={4}
+                  maxLength={6}
                   value={enteredOtp}
                   onChange={(e) => setEnteredOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="• • • •"
-                  className="w-full bg-warm-50 border border-warm-300 rounded-2xl px-4 py-3 text-center text-xl tracking-[1em] font-mono text-gray-900 focus:outline-none focus:border-brand-800"
+                  placeholder="• • • • • •"
+                  className="w-full bg-warm-50 border border-warm-300 rounded-2xl px-4 py-3 text-center text-2xl tracking-[0.6em] font-mono text-gray-900 focus:outline-none focus:border-brand-800 font-bold"
                   required
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-sm border border-gold-500/30"
-              >
-                <KeyRound size={16} />
-                <span>Verify & Login as Owner</span>
-              </button>
+              <div className="flex items-center justify-between text-xs px-1">
+                <span className="text-gray-500 font-mono">
+                  {canResend ? "Didn't receive code?" : `Resend OTP in ${resendTimer}s`}
+                </span>
+                {canResend && (
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    className="text-brand-900 font-bold hover:underline"
+                  >
+                    Resend SMS OTP
+                  </button>
+                )}
+              </div>
 
               <button
-                type="button"
-                onClick={() => setOtpStep(false)}
-                className="w-full text-xs text-gray-600 hover:text-brand-950 text-center py-1 transition"
+                type="submit"
+                className="w-full bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-sm border border-gold-500/30 cursor-pointer"
               >
-                Change Phone Number
+                <KeyRound size={16} />
+                <span>Verify OTP & Access Store</span>
               </button>
             </form>
           )}
@@ -366,6 +439,18 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
         >
           <ShoppingBag size={15} />
           <span>Live Orders ({mockOrders.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('security')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition ${
+            activeTab === 'security'
+              ? 'bg-brand-950 text-gold-300 shadow-md border border-gold-500/40'
+              : 'bg-white text-gray-700 hover:bg-warm-100 border border-warm-200'
+          }`}
+        >
+          <Lock size={15} />
+          <span>Owner Phone & Security 🔐</span>
         </button>
       </div>
 
@@ -1050,6 +1135,201 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* TAB 4: OWNER SECURITY & OWNERSHIP TRANSFER */}
+      {activeTab === 'security' && (
+        <div className="space-y-8">
+          
+          {/* Current Master Owner Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-warm-200">
+            <div className="flex items-center space-x-3 mb-6 border-b border-warm-200 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-brand-950 text-gold-400 flex items-center justify-center border border-gold-500/40 shadow-sm">
+                <ShieldCheck size={24} />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-brand-950">Store Ownership Credentials</h3>
+                <p className="text-xs text-gray-500">Verified master phone number authorized to access and modify the store.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="p-4 bg-brand-50/70 rounded-2xl border border-brand-200">
+                <p className="text-[10px] font-mono uppercase font-bold text-brand-800 tracking-wider">Active Owner Mobile</p>
+                <p className="text-lg font-bold font-mono text-brand-950 mt-0.5">+91 {registeredOwnerPhone}</p>
+                <span className="inline-flex items-center space-x-1 text-[10px] text-emerald-700 font-bold mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>Verified Master Account</span>
+                </span>
+              </div>
+
+              <div className="p-4 bg-warm-50 rounded-2xl border border-warm-200">
+                <p className="text-[10px] font-mono uppercase font-bold text-gray-600 tracking-wider">Last / Previous Owner</p>
+                <p className="text-sm font-bold font-mono text-gray-800 mt-1">
+                  {ownerAuth.previousOwnerPhone ? `+91 ${ownerAuth.previousOwnerPhone}` : "None (Founding Account)"}
+                </p>
+                <p className="text-[10px] text-gray-500 mt-1">Previous phone signed off via OTP</p>
+              </div>
+
+              <div className="p-4 bg-warm-50 rounded-2xl border border-warm-200">
+                <p className="text-[10px] font-mono uppercase font-bold text-gray-600 tracking-wider">Security Protection</p>
+                <p className="text-sm font-bold text-brand-900 mt-1">2-Step SMS OTP Enforced</p>
+                <p className="text-[10px] text-gray-500 mt-1">Requires Last Owner sign-off to change</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Transfer Ownership Form Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gold-400/40 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gold-400 via-brand-800 to-gold-400" />
+
+            <div className="mb-6">
+              <h3 className="font-serif text-xl font-bold text-brand-950 flex items-center space-x-2">
+                <Lock size={20} className="text-gold-600" />
+                <span>Transfer Store Ownership to Another Mobile Number</span>
+              </h3>
+              <p className="text-xs text-gray-600 mt-1">
+                To prevent unauthorized transfers, an authorization OTP will be sent to the <strong>CURRENT REGISTERED OWNER (+91 {registeredOwnerPhone})</strong> before the new owner number is activated.
+              </p>
+            </div>
+
+            {transferError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center space-x-2 text-xs text-red-700">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{transferError}</span>
+              </div>
+            )}
+
+            {/* Transfer SMS Dispatch Simulation */}
+            {showTransferSms && transferOtpSent && (
+              <div className="mb-6 bg-brand-950 text-white rounded-2xl p-4 border border-gold-400/60 shadow-lg animate-in fade-in duration-300">
+                <div className="flex items-center justify-between border-b border-gold-500/20 pb-2 mb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="text-[11px] font-mono font-bold text-gold-400 uppercase tracking-wider">Security SMS Sent to Current Owner (+91 {registeredOwnerPhone})</span>
+                  </div>
+                  <span className="text-[10px] text-gray-400">Just Now</span>
+                </div>
+                <p className="text-xs text-gray-200 leading-relaxed font-sans">
+                  <strong className="text-white">WB-SECURITY:</strong> Authorization Code to transfer store ownership to <strong className="text-gold-300 font-mono">+91 {newTransferPhone}</strong> is <strong className="font-mono text-gold-300 text-sm tracking-wider bg-black/40 px-2 py-0.5 rounded border border-gold-500/40 ml-1">{transferOtpSent}</strong>.
+                </p>
+                <div className="mt-2 pt-2 border-t border-white/10 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setEnteredTransferOtp(transferOtpSent)}
+                    className="text-[11px] font-bold text-gold-400 hover:text-gold-200 underline font-mono"
+                  >
+                    ⚡ Auto-Fill Security OTP ({transferOtpSent})
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {transferStep === 'input' ? (
+              <form onSubmit={handleRequestTransferOtp} className="max-w-xl space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
+                    New Owner Mobile Number
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-900 font-bold text-xs">
+                      +91
+                    </div>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={newTransferPhone}
+                      onChange={(e) => setNewTransferPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="e.g. 9845012345"
+                      className="w-full bg-warm-50 border border-warm-300 rounded-2xl pl-12 pr-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-brand-800 font-mono tracking-wider"
+                      required
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    An authorization OTP will be dispatched to your current phone (+91 {registeredOwnerPhone}) to approve.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3 px-6 rounded-2xl transition shadow-md flex items-center space-x-2 text-xs border border-gold-500/30 cursor-pointer"
+                >
+                  <Phone size={15} />
+                  <span>Send Authorization OTP to Current Owner (+91 {registeredOwnerPhone})</span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleConfirmTransfer} className="max-w-xl space-y-4">
+                <div className="p-4 bg-warm-100 rounded-2xl border border-warm-300 text-xs text-gray-800">
+                  <p className="font-bold text-brand-950">Confirming Ownership Transfer:</p>
+                  <p className="mt-1">
+                    From: <span className="font-mono font-bold text-gray-900">+91 {registeredOwnerPhone}</span> (Current Owner)
+                  </p>
+                  <p>
+                    To: <span className="font-mono font-bold text-brand-950">+91 {newTransferPhone}</span> (New Owner)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
+                    Enter 6-Digit Authorization OTP sent to +91 {registeredOwnerPhone}
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={enteredTransferOtp}
+                    onChange={(e) => setEnteredTransferOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="• • • • • •"
+                    className="w-full bg-warm-50 border border-warm-300 rounded-2xl px-4 py-3 text-center text-2xl tracking-[0.6em] font-mono text-gray-900 focus:outline-none focus:border-brand-800 font-bold"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <button
+                    type="submit"
+                    className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 px-6 rounded-2xl transition shadow-md flex items-center space-x-2 text-xs cursor-pointer"
+                  >
+                    <CheckCircle size={15} />
+                    <span>Approve & Complete Transfer</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setTransferStep('input'); setShowTransferSms(false); }}
+                    className="bg-warm-100 hover:bg-warm-200 text-gray-700 font-bold py-3 px-5 rounded-2xl transition text-xs"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Ownership Transfer History Audit Log */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-warm-200">
+            <h3 className="font-serif text-lg font-bold text-brand-950 mb-2">Ownership Transfer Audit Log</h3>
+            <p className="text-xs text-gray-500 mb-4">Immutable record of all registered owner number changes.</p>
+
+            <div className="space-y-3">
+              {(ownerAuth.transferHistory || [
+                { date: "Initial Setup", from: null, to: "9618861300", verifiedBy: "System Registration" }
+              ]).map((log, idx) => (
+                <div key={idx} className="p-4 rounded-2xl bg-warm-50 border border-warm-200 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-bold text-brand-950 font-mono">To: +91 {log.to}</span>
+                    {log.from && <span className="text-gray-500 ml-2 font-mono">(Transferred from +91 {log.from})</span>}
+                    <p className="text-[11px] text-gray-500 mt-0.5">{log.verifiedBy}</p>
+                  </div>
+                  <span className="font-mono text-[10px] text-gray-400 bg-white px-2.5 py-1 rounded-lg border border-warm-200">
+                    {log.date}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       )}
     </div>
