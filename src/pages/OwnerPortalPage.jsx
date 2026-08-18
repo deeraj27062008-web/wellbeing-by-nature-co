@@ -122,7 +122,7 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
     return () => clearInterval(interval);
   }, [otpStep, resendTimer]);
 
-  // Handle Send OTP for Login
+  // Handle Send OTP for Login via WhatsApp
   const handleSendOtp = (e) => {
     if (e) e.preventDefault();
     const cleanInput = phoneNumber.replace(/\D/g, '').slice(-10);
@@ -140,7 +140,13 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
     setAuthError('');
     setResendTimer(30);
     setCanResend(false);
-    setShowSmsPopup(true);
+
+    // Dispatch directly to Owner's WhatsApp
+    const waText = encodeURIComponent(
+      `🔐 *WellBeingByNatureCo Official Store Security*\n\nYour Store Owner Login Verification OTP is: *${generatedOtp}*\n\n⏱ Valid for 5 minutes. Do not share this code with anyone.`
+    );
+    const waUrl = `https://api.whatsapp.com/send?phone=91${cleanRegistered}&text=${waText}`;
+    window.open(waUrl, '_blank');
   };
 
   // Handle Verify OTP for Login
@@ -150,14 +156,13 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
       loginOwner(phoneNumber);
       setOtpStep(false);
       setAuthError('');
-      setShowSmsPopup(false);
       triggerSaveToast(`Authentication successful! Welcome, Owner of WellBeingByNatureCo (+91 ${registeredOwnerPhone}).`);
     } else {
-      setAuthError('Incorrect OTP. Please enter the 6-digit OTP sent to your mobile.');
+      setAuthError('Incorrect OTP. Please enter the 6-digit OTP sent to your WhatsApp.');
     }
   };
 
-  // Handle Request Ownership Transfer OTP (Dispatched to CURRENT / LAST OWNER)
+  // Handle Request Ownership Transfer OTP (Dispatched to CURRENT / LAST OWNER on WhatsApp)
   const handleRequestTransferOtp = (e) => {
     e.preventDefault();
     const cleanNew = newTransferPhone.replace(/\D/g, '').slice(-10);
@@ -178,7 +183,13 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
     setTransferOtpSent(otp);
     setTransferStep('otp_verify');
     setTransferError('');
-    setShowTransferSms(true);
+
+    // Dispatch directly to Current (Last) Owner's WhatsApp
+    const waText = encodeURIComponent(
+      `⚠️ *WellBeingByNatureCo Ownership Transfer Request*\n\nA request was made to transfer store ownership to new mobile: +91 ${cleanNew}.\n\nYour Authorization Security OTP is: *${otp}*\n\nEnter this code in the portal to approve the transfer.`
+    );
+    const waUrl = `https://api.whatsapp.com/send?phone=91${cleanCurrent}&text=${waText}`;
+    window.open(waUrl, '_blank');
   };
 
   // Handle Confirm Ownership Transfer
@@ -192,61 +203,35 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
       setNewTransferPhone('');
       setEnteredTransferOtp('');
       setTransferOtpSent('');
-      setShowTransferSms(false);
       triggerSaveToast(`🎉 Ownership transfer complete! Primary owner is now +91 ${cleanNew}. Previous owner: +91 ${oldOwner}.`);
     } else {
-      setTransferError('Invalid Confirmation OTP. Please enter the OTP sent to the last owner mobile.');
+      setTransferError('Invalid Confirmation OTP. Please enter the OTP sent to the last owner WhatsApp.');
     }
   };
 
   // If Not Authenticated, show Owner Login Screen
   if (!ownerAuth.isAuthenticated) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gold-400/40 p-8 relative overflow-hidden">
+      <div className="min-h-[80vh] flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gold-400/40 p-6 sm:p-8 relative overflow-hidden">
           
           {/* Top Gold Accent Border */}
           <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-gold-400 via-brand-800 to-gold-400" />
 
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             {/* Circular Luxury Emblem */}
-            <div className="w-16 h-16 rounded-full bg-brand-950 p-1 border-2 border-gold-400/80 shadow-md flex items-center justify-center mx-auto mb-3 overflow-hidden">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-brand-950 p-1 border-2 border-gold-400/80 shadow-md flex items-center justify-center mx-auto mb-3 overflow-hidden">
               <img 
                 src="/images/logo/logo.png" 
                 alt="WellBeingByNatureCo Emblem" 
                 className="w-full h-full object-contain mix-blend-screen"
               />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-brand-950">Store Owner Portal</h2>
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-brand-950">Store Owner Portal</h2>
             <p className="text-xs text-gray-600 mt-1">
-              Secure phone verification for <strong>WellBeingByNatureCo</strong> administration.
+              WhatsApp OTP Verification for <strong>WellBeingByNatureCo</strong>
             </p>
           </div>
-
-          {/* SMS Notification Banner Simulation (Real Phone Dispatch) */}
-          {showSmsPopup && dispatchedOtp && (
-            <div className="mb-6 bg-brand-950 text-white rounded-2xl p-4 border border-gold-400/60 shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="flex items-center justify-between border-b border-gold-500/20 pb-2 mb-2">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] font-mono font-bold text-gold-400 uppercase tracking-wider">SMS Gateway • +91 {registeredOwnerPhone}</span>
-                </div>
-                <span className="text-[10px] text-gray-400">Just Now</span>
-              </div>
-              <p className="text-xs text-gray-200 leading-relaxed font-sans">
-                <strong className="text-white">WB-NATURE:</strong> Your Owner Login OTP is <strong className="font-mono text-gold-300 text-sm tracking-wider bg-black/40 px-2 py-0.5 rounded border border-gold-500/40 ml-1">{dispatchedOtp}</strong>. Valid for 5 minutes.
-              </p>
-              <div className="mt-2.5 pt-2 border-t border-white/10 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setEnteredOtp(dispatchedOtp)}
-                  className="text-[11px] font-bold text-gold-400 hover:text-gold-200 underline font-mono"
-                >
-                  ⚡ Auto-Fill OTP ({dispatchedOtp})
-                </button>
-              </div>
-            </div>
-          )}
 
           {authError && (
             <div className="mb-6 p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-start space-x-2 text-xs text-red-700">
@@ -256,7 +241,7 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
           )}
 
           {!otpStep ? (
-            <form onSubmit={handleSendOtp} className="space-y-5">
+            <form onSubmit={handleSendOtp} className="space-y-4 sm:space-y-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
                   Owner Mobile Number
@@ -276,39 +261,52 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
                   />
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-gray-500 mt-1.5 px-1">
-                  <span>Registered Master Phone: <strong>+91 {registeredOwnerPhone}</strong></span>
-                  <span className="text-emerald-700 font-bold">● Active</span>
+                  <span>Authorized Owner: <strong>+91 {registeredOwnerPhone}</strong></span>
+                  <span className="text-emerald-700 font-bold flex items-center space-x-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>WhatsApp Verified</span>
+                  </span>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-sm border border-gold-500/30 cursor-pointer"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-xs sm:text-sm border border-emerald-600/30 cursor-pointer"
               >
-                <Phone size={16} />
-                <span>Send OTP to Mobile (+91 {registeredOwnerPhone})</span>
+                <span>💬 Send OTP to WhatsApp (+91 {registeredOwnerPhone})</span>
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               
-              <div className="p-3 bg-warm-100 rounded-2xl border border-warm-300 text-xs text-gray-700 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-brand-950">Mobile: +91 {phoneNumber}</p>
-                  <p className="text-[10px] text-gray-500">6-digit verification code sent via SMS</p>
+              {/* WhatsApp Sent Status (Zero OTP text shown on screen) */}
+              <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl text-xs text-emerald-900 space-y-2">
+                <div className="flex items-center space-x-2 font-bold text-emerald-950">
+                  <CheckCircle size={16} className="text-emerald-700 shrink-0" />
+                  <span>OTP Sent to your WhatsApp on +91 {phoneNumber}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => { setOtpStep(false); setShowSmsPopup(false); }}
-                  className="text-xs text-brand-900 font-bold hover:underline"
-                >
-                  Edit
-                </button>
+                <p className="text-[11px] text-emerald-800 leading-relaxed">
+                  Please check your WhatsApp on <strong>+91 {phoneNumber}</strong> and enter the 6-digit verification code below.
+                </p>
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const waText = encodeURIComponent(
+                        `🔐 *WellBeingByNatureCo Official Store Security*\n\nYour Store Owner Login Verification OTP is: *${dispatchedOtp}*\n\n⏱ Valid for 5 minutes. Do not share this code with anyone.`
+                      );
+                      window.open(`https://api.whatsapp.com/send?phone=91${phoneNumber}&text=${waText}`, '_blank');
+                    }}
+                    className="inline-flex items-center space-x-1.5 text-[11px] font-bold text-emerald-900 bg-white px-3 py-1.5 rounded-xl border border-emerald-300 shadow-xs hover:bg-emerald-100/50"
+                  >
+                    <span>💬 Open WhatsApp Message</span>
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
-                  Enter 6-Digit OTP
+                  Enter 6-Digit OTP from WhatsApp
                 </label>
                 <input
                   type="text"
@@ -323,15 +321,15 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
 
               <div className="flex items-center justify-between text-xs px-1">
                 <span className="text-gray-500 font-mono">
-                  {canResend ? "Didn't receive code?" : `Resend OTP in ${resendTimer}s`}
+                  {canResend ? "Didn't receive code?" : `Resend WhatsApp OTP in ${resendTimer}s`}
                 </span>
                 {canResend && (
                   <button
                     type="button"
                     onClick={handleSendOtp}
-                    className="text-brand-900 font-bold hover:underline"
+                    className="text-emerald-800 font-bold hover:underline"
                   >
-                    Resend SMS OTP
+                    Resend WhatsApp OTP
                   </button>
                 )}
               </div>
@@ -341,12 +339,20 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
                 className="w-full bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3.5 rounded-2xl transition shadow-md flex items-center justify-center space-x-2 text-sm border border-gold-500/30 cursor-pointer"
               >
                 <KeyRound size={16} />
-                <span>Verify OTP & Access Store</span>
+                <span>Verify OTP & Login</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOtpStep(false)}
+                className="w-full text-xs text-gray-600 hover:text-brand-950 text-center py-1 transition"
+              >
+                Change Phone Number
               </button>
             </form>
           )}
 
-          <div className="mt-8 pt-6 border-t border-warm-200 text-center">
+          <div className="mt-6 pt-4 border-t border-warm-200 text-center">
             <button
               onClick={onGoHome}
               className="text-xs text-brand-900 hover:underline font-semibold"
@@ -1201,31 +1207,6 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
               </div>
             )}
 
-            {/* Transfer SMS Dispatch Simulation */}
-            {showTransferSms && transferOtpSent && (
-              <div className="mb-6 bg-brand-950 text-white rounded-2xl p-4 border border-gold-400/60 shadow-lg animate-in fade-in duration-300">
-                <div className="flex items-center justify-between border-b border-gold-500/20 pb-2 mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="text-[11px] font-mono font-bold text-gold-400 uppercase tracking-wider">Security SMS Sent to Current Owner (+91 {registeredOwnerPhone})</span>
-                  </div>
-                  <span className="text-[10px] text-gray-400">Just Now</span>
-                </div>
-                <p className="text-xs text-gray-200 leading-relaxed font-sans">
-                  <strong className="text-white">WB-SECURITY:</strong> Authorization Code to transfer store ownership to <strong className="text-gold-300 font-mono">+91 {newTransferPhone}</strong> is <strong className="font-mono text-gold-300 text-sm tracking-wider bg-black/40 px-2 py-0.5 rounded border border-gold-500/40 ml-1">{transferOtpSent}</strong>.
-                </p>
-                <div className="mt-2 pt-2 border-t border-white/10 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setEnteredTransferOtp(transferOtpSent)}
-                    className="text-[11px] font-bold text-gold-400 hover:text-gold-200 underline font-mono"
-                  >
-                    ⚡ Auto-Fill Security OTP ({transferOtpSent})
-                  </button>
-                </div>
-              </div>
-            )}
-
             {transferStep === 'input' ? (
               <form onSubmit={handleRequestTransferOtp} className="max-w-xl space-y-4">
                 <div>
@@ -1247,33 +1228,32 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
                     />
                   </div>
                   <p className="text-[11px] text-gray-500 mt-1">
-                    An authorization OTP will be dispatched to your current phone (+91 {registeredOwnerPhone}) to approve.
+                    An authorization OTP will be dispatched to the last/current owner WhatsApp (+91 {registeredOwnerPhone}) to approve.
                   </p>
                 </div>
 
                 <button
                   type="submit"
-                  className="bg-brand-950 hover:bg-brand-900 text-gold-300 font-bold py-3 px-6 rounded-2xl transition shadow-md flex items-center space-x-2 text-xs border border-gold-500/30 cursor-pointer"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 px-6 rounded-2xl transition shadow-md flex items-center space-x-2 text-xs border border-emerald-600/30 cursor-pointer"
                 >
-                  <Phone size={15} />
-                  <span>Send Authorization OTP to Current Owner (+91 {registeredOwnerPhone})</span>
+                  <span>💬 Send Authorization OTP to Current Owner WhatsApp (+91 {registeredOwnerPhone})</span>
                 </button>
               </form>
             ) : (
               <form onSubmit={handleConfirmTransfer} className="max-w-xl space-y-4">
-                <div className="p-4 bg-warm-100 rounded-2xl border border-warm-300 text-xs text-gray-800">
-                  <p className="font-bold text-brand-950">Confirming Ownership Transfer:</p>
-                  <p className="mt-1">
-                    From: <span className="font-mono font-bold text-gray-900">+91 {registeredOwnerPhone}</span> (Current Owner)
-                  </p>
-                  <p>
-                    To: <span className="font-mono font-bold text-brand-950">+91 {newTransferPhone}</span> (New Owner)
+                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-300 text-xs text-emerald-950 space-y-1.5">
+                  <div className="flex items-center space-x-1.5 font-bold">
+                    <CheckCircle size={15} className="text-emerald-700" />
+                    <span>Security OTP Dispatched to Current Owner WhatsApp (+91 {registeredOwnerPhone})</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-800">
+                    To authorize transferring store ownership from <strong>+91 {registeredOwnerPhone}</strong> to <strong>+91 {newTransferPhone}</strong>, please enter the 6-digit code received on WhatsApp.
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5 font-mono">
-                    Enter 6-Digit Authorization OTP sent to +91 {registeredOwnerPhone}
+                    Enter 6-Digit WhatsApp OTP sent to +91 {registeredOwnerPhone}
                   </label>
                   <input
                     type="text"
@@ -1297,7 +1277,7 @@ export function OwnerPortalPage({ onSelectProduct, onGoHome }) {
 
                   <button
                     type="button"
-                    onClick={() => { setTransferStep('input'); setShowTransferSms(false); }}
+                    onClick={() => { setTransferStep('input'); setEnteredTransferOtp(''); }}
                     className="bg-warm-100 hover:bg-warm-200 text-gray-700 font-bold py-3 px-5 rounded-2xl transition text-xs"
                   >
                     Cancel

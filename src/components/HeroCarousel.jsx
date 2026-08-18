@@ -136,10 +136,10 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 sm:pt-4">
               <button
                 onClick={handleCtaClick}
-                className="bg-[#C5A059] hover:bg-[#B38A4A] text-brand-950 text-xs sm:text-sm font-extrabold px-8 py-4 rounded-full shadow-lg hover:scale-105 transition-all flex items-center space-x-2 group uppercase tracking-wider"
+                className="w-full sm:w-auto bg-[#C5A059] hover:bg-[#B38A4A] text-brand-950 text-xs sm:text-sm font-extrabold px-7 py-3.5 sm:py-4 rounded-full shadow-lg hover:scale-105 transition-all flex items-center justify-center space-x-2 group uppercase tracking-wider cursor-pointer"
               >
                 <span>{current.ctaText}</span>
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -147,7 +147,7 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
 
               <button
                 onClick={onGoShop}
-                className="bg-white/10 hover:bg-white/20 text-gold-300 border border-gold-500/40 text-xs font-semibold px-6 py-4 rounded-full transition-all flex items-center space-x-2 uppercase tracking-wider font-mono"
+                className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-gold-300 border border-gold-500/40 text-xs font-semibold px-6 py-3.5 sm:py-4 rounded-full transition-all flex items-center justify-center space-x-2 uppercase tracking-wider font-mono cursor-pointer"
               >
                 <span>{current.secondaryText}</span>
               </button>
@@ -155,13 +155,13 @@ export function HeroCarousel({ onOpenQuiz, onSelectProduct, onOpenBatchVerifier,
           </div>
 
           {/* Right Product Image Stage */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="relative group cursor-pointer" onClick={handleCtaClick}>
+          <div className="lg:col-span-5 flex justify-center lg:justify-end mt-4 lg:mt-0">
+            <div className="relative group cursor-pointer w-full max-w-xs sm:max-w-sm" onClick={handleCtaClick}>
               {/* Luxury Glow */}
               <div className="absolute -inset-4 bg-gold-500/20 rounded-3xl blur-2xl group-hover:bg-gold-400/30 transition-all duration-500" />
 
               {/* Card Container */}
-              <div className="relative bg-white/10 backdrop-blur-md p-5 rounded-3xl border border-gold-400/40 shadow-2xl overflow-hidden max-w-sm sm:max-w-md">
+              <div className="relative bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-gold-400/40 shadow-2xl overflow-hidden">
                 
                 {/* Accent Badge */}
                 <div className="absolute top-6 left-6 z-10 bg-brand-950/95 text-gold-300 text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-full shadow-md border border-gold-500/40 flex items-center space-x-1">
